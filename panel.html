@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nutri MJUZ — Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body class="panel-page">
+
+  <!-- HEADER -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-icon">⚕</span>
+      <span class="brand-name">Nutri <strong>MJUZ</strong></span>
+    </div>
+    <div class="topbar-right">
+      <span id="bienvenida" class="welcome-text"></span>
+      <button id="btn-logout" class="btn-logout">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="panel-grid">
+
+    <!-- COLUMNA IZQUIERDA -->
+    <aside class="sidebar">
+
+      <!-- REGISTRO DE PACIENTE -->
+      <section class="card">
+        <h2 class="card-title">Registrar Paciente</h2>
+        <form id="form-paciente">
+          <div class="field">
+            <label>Nombre completo</label>
+            <input type="text" id="pac-nombre" placeholder="Nombre del paciente" required />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Edad</label>
+              <input type="number" id="pac-edad" placeholder="Años" min="1" max="120" required />
+            </div>
+            <div class="field">
+              <label>Sexo</label>
+              <select id="pac-sexo" required>
+                <option value="">—</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Peso (kg)</label>
+              <input type="number" id="pac-peso" placeholder="Ej. 70.5" step="0.1" min="1" required />
+            </div>
+            <div class="field">
+              <label>Altura (m)</label>
+              <input type="number" id="pac-altura" placeholder="Ej. 1.70" step="0.01" min="0.5" max="2.5" required />
+            </div>
+          </div>
+
+          <!-- Resultado IMC en tiempo real -->
+          <div id="imc-preview" class="imc-preview hidden">
+            <span class="imc-label">IMC calculado:</span>
+            <span id="imc-valor" class="imc-valor"></span>
+            <span id="imc-diag" class="imc-badge"></span>
+          </div>
+
+          <button type="submit" class="btn-primary">Guardar Paciente</button>
+          <p id="msg-paciente" class="success-msg hidden"></p>
+        </form>
+      </section>
+
+    </aside>
+
+    <!-- COLUMNA DERECHA -->
+    <section class="main-col">
+
+      <!-- SELECCIÓN DE PACIENTE + CONSULTA -->
+      <div class="card">
+        <h2 class="card-title">Nueva Consulta</h2>
+        <form id="form-consulta">
+          <div class="field">
+            <label>Paciente</label>
+            <select id="sel-paciente" required>
+              <option value="">— Selecciona un paciente —</option>
+            </select>
+          </div>
+
+          <!-- Info del paciente seleccionado -->
+          <div id="info-paciente" class="patient-info hidden">
+            <div class="info-chip" id="chip-edad"></div>
+            <div class="info-chip" id="chip-peso"></div>
+            <div class="info-chip" id="chip-imc"></div>
+            <div class="info-chip" id="chip-diag"></div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Fecha</label>
+              <input type="date" id="cons-fecha" required />
+            </div>
+            <div class="field">
+              <label>Hora</label>
+              <input type="time" id="cons-hora" required />
+            </div>
+          </div>
+          <div class="field">
+            <label>Evolución del paciente</label>
+            <textarea id="cons-evolucion" rows="3" placeholder="Describe los cambios observados desde la última consulta..." required></textarea>
+          </div>
+          <div class="field">
+            <label>Plan de alimentación</label>
+            <textarea id="cons-plan" rows="3" placeholder="Describe el plan nutricional para este período..." required></textarea>
+          </div>
+
+          <!-- Estado de edición oculto -->
+          <input type="hidden" id="cons-edit-id" value="" />
+
+          <div class="btn-row">
+            <button type="submit" id="btn-guardar-consulta" class="btn-primary">Guardar Consulta</button>
+            <button type="button" id="btn-cancelar-edicion" class="btn-secondary hidden">Cancelar edición</button>
+          </div>
+          <p id="msg-consulta" class="success-msg hidden"></p>
+        </form>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="card">
+        <h2 class="card-title">
+          Historial de Consultas
+          <span id="nombre-historial" class="historial-patient"></span>
+        </h2>
+        <div id="historial-container">
+          <p class="empty-state">Selecciona un paciente para ver su historial.</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script type="module" src="./js/ui-panel.js"></script>
+</body>
+</html>

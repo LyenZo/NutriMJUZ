@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nutri MJUZ — Acceso</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body class="login-page">
+
+  <div class="login-wrapper">
+    <div class="login-deco"></div>
+
+    <div class="login-card">
+      <div class="brand">
+        <span class="brand-icon">⚕</span>
+        <h1 class="brand-name">Nutri <span>MJUZ</span></h1>
+        <p class="brand-sub">Sistema Clínico Nutricional</p>
+      </div>
+
+      <form id="form-login">
+        <div class="field">
+          <label for="nombre-nutriologo">Nombre del Nutriólogo</label>
+          <input
+            type="text"
+            id="nombre-nutriologo"
+            autocomplete="off"
+            required
+          />
+        </div>
+        <p id="error-login" class="error-msg hidden">Por favor ingresa tu nombre para continuar.</p>
+        <button type="submit" class="btn-primary">Iniciar Sesión →</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="./js/ui-login.js"></script>
+</body>
+</html>
