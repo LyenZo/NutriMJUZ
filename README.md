@@ -57,7 +57,7 @@ Luego abrir `http://localhost:8000` en el navegador.
 
 ## Demo en producción
 
-[Enlace Vercel / Netlify aquí]
+https://nutri-mjuz.vercel.app/
 
 ## Repositorio
 
