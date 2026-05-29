@@ -1,4 +1,8 @@
-
+/**
+ * ui-panel.js
+ * Maneja exclusivamente el DOM de panel.html.
+ * Importa todo desde los módulos especializados.
+ */
 
 import { verificarAcceso, obtenerSesion, cerrarSesion } from "./auth.js";
 import { calcularIMC, diagnosticar, claseDiagnostico }  from "./imc.js";
@@ -10,13 +14,19 @@ import {
   actualizarConsulta,
   eliminarConsulta,
   obtenerConsultasPorPaciente,
+  borrarTodosLosDatos,
 } from "./storage.js";
 
-
+// ─── GUARDIA DE ACCESO (lo primero que corre) ────────────────────────────────
 verificarAcceso();
 
+// ─── REFERENCIAS AL DOM ──────────────────────────────────────────────────────
 const bienvenida          = document.getElementById("bienvenida");
 const btnLogout           = document.getElementById("btn-logout");
+const btnReset            = document.getElementById("btn-reset");
+const modalReset          = document.getElementById("modal-reset");
+const btnConfirmarReset   = document.getElementById("btn-confirmar-reset");
+const btnCancelarReset    = document.getElementById("btn-cancelar-reset");
 
 // Formulario paciente
 const formPaciente        = document.getElementById("form-paciente");
@@ -62,7 +72,40 @@ btnLogout.addEventListener("click", () => {
   window.location.href = "./index.html";
 });
 
-// ─── IMC EN TIEMPO REAL (mientras escribe peso/altura) ──────────────────────
+// ─── BORRAR TODOS LOS DATOS ──────────────────────────────────────────────────
+btnReset.addEventListener("click", () => {
+  modalReset.classList.remove("hidden");
+});
+
+btnCancelarReset.addEventListener("click", () => {
+  modalReset.classList.add("hidden");
+});
+
+// Cerrar modal al hacer clic fuera del cuadro
+modalReset.addEventListener("click", (e) => {
+  if (e.target === modalReset) modalReset.classList.add("hidden");
+});
+
+btnConfirmarReset.addEventListener("click", () => {
+  borrarTodosLosDatos();
+  modalReset.classList.add("hidden");
+
+  // Resetear toda la UI al estado inicial
+  formPaciente.reset();
+  formConsulta.reset();
+  imcPreview.classList.add("hidden");
+  infoPaciente.classList.add("hidden");
+  consEditId.value = "";
+  btnGuardarConsulta.textContent = "Guardar Consulta";
+  btnCancelarEdicion.classList.add("hidden");
+  nombreHistorial.textContent = "";
+  historialContainer.innerHTML = `<p class="empty-state">Selecciona un paciente para ver su historial.</p>`;
+  rellenarSelectPacientes();
+  setFechaHoraActual();
+  mostrarMensaje(msgPaciente, "✓ Todos los datos han sido eliminados.");
+});
+
+// ─── IMC EN TIEMPO REAL ──────────────────────────────────────────────────────
 [inputPeso, inputAltura].forEach(el => {
   el.addEventListener("input", actualizarIMCPreview);
 });
@@ -123,14 +166,12 @@ selPaciente.addEventListener("change", () => {
   const paciente = obtenerPacientePorId(id);
   if (!paciente) return;
 
-  // Mostrar chips informativos
   chipEdad.textContent = `${paciente.edad} años • ${paciente.sexo}`;
   chipPeso.textContent = `${paciente.peso} kg / ${paciente.altura} m`;
   chipIMC.textContent  = `IMC: ${paciente.imc}`;
   chipDiag.textContent = paciente.diagnostico;
   infoPaciente.classList.remove("hidden");
 
-  // Renderizar historial
   nombreHistorial.textContent = paciente.nombre;
   renderizarHistorial(id);
 });
@@ -156,31 +197,27 @@ formConsulta.addEventListener("submit", (e) => {
   };
 
   if (editId) {
-    // MODO EDICIÓN → actualiza sin duplicar
     actualizarConsulta(editId, datosCons);
     mostrarMensaje(msgConsulta, "✓ Consulta actualizada correctamente.");
     salirModoEdicion();
   } else {
-    // MODO NUEVO → guarda nueva consulta
     guardarConsulta(datosCons);
     mostrarMensaje(msgConsulta, "✓ Consulta guardada correctamente.");
     formConsulta.reset();
-    rellenarSelectPacientes(); // reseleccionar el mismo paciente
+    rellenarSelectPacientes();
     selPaciente.value = pacienteId;
-    selPaciente.dispatchEvent(new Event("change")); // actualizar info chips
+    selPaciente.dispatchEvent(new Event("change"));
     setFechaHoraActual();
   }
 
-  // Actualizar historial en tiempo real (sin recargar página)
   renderizarHistorial(pacienteId);
 });
 
-// Cancelar edición
 btnCancelarEdicion.addEventListener("click", salirModoEdicion);
 
 // ─── RENDERIZADO DE HISTORIAL ────────────────────────────────────────────────
 function renderizarHistorial(pacienteId) {
-  const consultas = obtenerConsultasPorPaciente(pacienteId); // ya ordenadas: más reciente primero
+  const consultas = obtenerConsultasPorPaciente(pacienteId);
 
   if (consultas.length === 0) {
     historialContainer.innerHTML = `<p class="empty-state">No hay consultas registradas para este paciente.</p>`;
@@ -212,7 +249,6 @@ function renderizarHistorial(pacienteId) {
     </div>
   `).join("");
 
-  // Delegar eventos de edición y eliminación
   historialContainer.querySelectorAll(".btn-editar").forEach(btn => {
     btn.addEventListener("click", () => cargarConsultaParaEdicion(parseInt(btn.dataset.id, 10)));
   });
@@ -233,18 +269,15 @@ function cargarConsultaParaEdicion(idConsulta) {
   const consulta  = consultas.find(c => c.id === idConsulta);
   if (!consulta) return;
 
-  // Rellenar formulario con datos existentes
   consFecha.value      = consulta.fecha;
   consHora.value       = consulta.hora;
   consEvolucion.value  = consulta.evolucion;
   consPlan.value       = consulta.plan;
 
-  // Activar modo edición
   consEditId.value = idConsulta;
   btnGuardarConsulta.textContent = "💾 Guardar Cambios";
   btnCancelarEdicion.classList.remove("hidden");
 
-  // Scroll suave al formulario
   formConsulta.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -259,9 +292,8 @@ function salirModoEdicion() {
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
-/** Rellena el select de pacientes desde localStorage */
 function rellenarSelectPacientes() {
-  const pacientes = obtenerPacientes();
+  const pacientes   = obtenerPacientes();
   const valorActual = selPaciente.value;
 
   selPaciente.innerHTML = `<option value="">— Selecciona un paciente —</option>`;
@@ -272,18 +304,15 @@ function rellenarSelectPacientes() {
     selPaciente.appendChild(opt);
   });
 
-  // Restaurar selección previa si aún existe
   if (valorActual) selPaciente.value = valorActual;
 }
 
-/** Pone la fecha y hora actuales en el formulario de consulta */
 function setFechaHoraActual() {
-  const ahora   = new Date();
+  const ahora     = new Date();
   consFecha.value = ahora.toISOString().split("T")[0];
   consHora.value  = ahora.toTimeString().slice(0, 5);
 }
 
-/** Formatea "2025-06-15" → "15 de junio de 2025" */
 function formatearFecha(fechaStr) {
   const [y, m, d] = fechaStr.split("-");
   const meses = ["enero","febrero","marzo","abril","mayo","junio",
@@ -291,7 +320,6 @@ function formatearFecha(fechaStr) {
   return `${parseInt(d)} de ${meses[parseInt(m) - 1]} de ${y}`;
 }
 
-/** Escapa HTML para evitar XSS en notas de usuario */
 function escaparHTML(str) {
   return str
     .replace(/&/g, "&amp;")
@@ -300,7 +328,6 @@ function escaparHTML(str) {
     .replace(/\n/g, "<br>");
 }
 
-/** Muestra un mensaje de éxito y lo oculta tras 3 segundos */
 function mostrarMensaje(el, texto) {
   el.textContent = texto;
   el.classList.remove("hidden");

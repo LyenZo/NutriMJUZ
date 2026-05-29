@@ -108,3 +108,8 @@ export function obtenerConsultasPorPaciente(pacienteId) {
     .filter(c => c.pacienteId === pacienteId)
     .sort((a, b) => b.id - a.id); // más reciente primero
 }
+
+export function borrarTodosLosDatos() {
+  localStorage.removeItem("nutri_pacientes");
+  localStorage.removeItem("nutri_consultas");
+}
